@@ -1,0 +1,93 @@
+# Airflow Scheduler Kubernetes Deployment Example
+# This can be used as a reference for Helm chart templates
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-scheduler
+  labels:
+    app: airflow-scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-scheduler
+  template:
+    metadata:
+      labels:
+        app: airflow-scheduler
+    spec:
+      serviceAccountName: airflow-scheduler
+      containers:
+      - name: airflow-scheduler
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["airflow", "scheduler"]
+        env:
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: "KubernetesExecutor"
+        - name: AIRFLOW__KUBERNETES__NAMESPACE
+          value: "{{ .Release.Namespace }}"
+        - name: AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY
+          value: "{{ .Values.image.repository }}"
+        - name: AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG
+          value: "{{ .Values.image.tag }}"
+        - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+          valueFrom:
+            secretKeyRef:
+              name: airflow-secrets
+              key: database-url
+        - name: AIRFLOW__CELERY__BROKER_URL
+          valueFrom:
+            secretKeyRef:
+              name: airflow-secrets
+              key: broker-url
+        - name: AIRFLOW__CELERY__RESULT_BACKEND
+          valueFrom:
+            secretKeyRef:
+              name: airflow-secrets
+              key: result-backend-url
+        resources:
+          requests:
+            memory: "{{ .Values.resources.requests.memory }}"
+            cpu: "{{ .Values.resources.requests.cpu }}"
+          limits:
+            memory: "{{ .Values.resources.limits.memory }}"
+            cpu: "{{ .Values.resources.limits.cpu }}"
+        volumeMounts:
+        - name: airflow-dags
+          mountPath: /opt/airflow/dags
+        - name: airflow-logs
+          mountPath: /opt/airflow/logs
+        - name: airflow-plugins
+          mountPath: /opt/airflow/plugins
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - "pgrep -f 'airflow scheduler'"
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - "pgrep -f 'airflow scheduler'"
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: airflow-dags
+        persistentVolumeClaim:
+          claimName: airflow-dags-pvc
+      - name: airflow-logs
+        persistentVolumeClaim:
+          claimName: airflow-logs-pvc
+      - name: airflow-plugins
+        configMap:
+          name: airflow-plugins
