@@ -205,6 +205,47 @@ make dev
 docker run --rm -it -v $(pwd):/app dbt-operator:latest /bin/bash
 ```
 
+## GitHub Actions CI/CD
+
+이 프로젝트는 GitHub Actions를 사용한 자동화된 CI/CD 파이프라인을 포함합니다.
+
+### 워크플로우 종류
+
+1. **CI/CD Pipeline** (`.github/workflows/ci-cd.yml`)
+   - 자동 트리거: push, pull_request
+   - 수동 실행: workflow_dispatch
+   - 기능: 빌드, 테스트, 보안 스캔, 배포
+
+2. **Quick Build** (`.github/workflows/quick-build.yml`)
+   - 수동 실행만 가능
+   - 빠른 빌드 및 테스트
+
+3. **Poetry Environment** (`.github/workflows/poetry-env.yml`)
+   - Poetry 환경 관리
+   - 의존성 설치, 업데이트, 검증
+
+### 수동 실행 방법
+
+1. **GitHub 웹 인터페이스에서**:
+   - Actions 탭 → 원하는 워크플로우 선택
+   - "Run workflow" 버튼 클릭
+   - 파라미터 설정 후 실행
+
+2. **사용 가능한 파라미터**:
+   - `operator`: 선택할 dbt-operator (dbt-operator, dbt-core-operator, dbt-postgres-operator)
+   - `image_tag`: Docker 이미지 태그 (기본값: latest)
+   - `registry`: Docker 레지스트리 URL (기본값: localhost:65000)
+   - `push_to_registry`: 레지스트리에 푸시 여부 (기본값: false)
+
+### Self-hosted Runner 설정
+
+이 워크플로우는 `localhost:65000`의 self-hosted runner를 사용합니다.
+
+```bash
+# Self-hosted runner 등록 예제
+./config.sh --url https://github.com/your-org/your-repo --token YOUR_TOKEN
+```
+
 ## 도움말
 
 사용 가능한 모든 Makefile 타겟을 보려면:
