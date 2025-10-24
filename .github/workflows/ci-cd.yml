@@ -1,10 +1,10 @@
 name: CI/CD Pipeline
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+  # push:
+  #   branches: [ main, develop ]
+  # pull_request:
+  #   branches: [ main ]
   workflow_dispatch:
     inputs:
       operator:
@@ -13,7 +13,7 @@ on:
         default: 'dbt-operator'
         type: choice
         options:
-          - dbt-operator
+          - dbt
           - dbt-core-operator
           - dbt-postgres-operator
       image_tag:
@@ -35,12 +35,12 @@ on:
 env:
   REGISTRY_URL: ${{ github.event.inputs.registry || 'localhost:65000' }}
   IMAGE_TAG: ${{ github.event.inputs.image_tag || 'latest' }}
-  OPERATOR_NAME: ${{ github.event.inputs.operator || 'dbt-operator' }}
+  OPERATOR_NAME: ${{ github.event.inputs.operator || 'dbt' }}
 
 jobs:
   build-and-test:
     runs-on: self-hosted
-    if: github.event.inputs.operator == 'dbt-operator' || github.event.inputs.operator == '' || github.event_name == 'push' || github.event_name == 'pull_request'
+    if: github.event.inputs.operator == 'dbt' || github.event.inputs.operator == '' || github.event_name == 'push' || github.event_name == 'pull_request'
     
     steps:
     - name: Checkout code
@@ -73,7 +73,7 @@ jobs:
 
   poetry-check:
     runs-on: self-hosted
-    if: github.event.inputs.operator == 'dbt-operator' || github.event.inputs.operator == '' || github.event_name == 'push' || github.event_name == 'pull_request'
+    if: github.event.inputs.operator == 'dbt' || github.event.inputs.operator == '' || github.event_name == 'push' || github.event_name == 'pull_request'
     
     steps:
     - name: Checkout code
@@ -115,7 +115,7 @@ jobs:
 
   security-scan:
     runs-on: self-hosted
-    if: github.event.inputs.operator == 'dbt-operator' || github.event.inputs.operator == '' || github.event_name == 'push' || github.event_name == 'pull_request'
+    if: github.event.inputs.operator == 'dbt' || github.event.inputs.operator == '' || github.event_name == 'push' || github.event_name == 'pull_request'
     
     steps:
     - name: Checkout code

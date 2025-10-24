@@ -9,7 +9,7 @@ on:
         default: 'dbt-operator'
         type: choice
         options:
-          - dbt-operator
+          - dbt
           - dbt-core-operator
           - dbt-postgres-operator
       image_tag:
@@ -21,7 +21,7 @@ on:
 env:
   REGISTRY_URL: 'localhost:65000'
   IMAGE_TAG: ${{ github.event.inputs.image_tag || 'latest' }}
-  OPERATOR_NAME: ${{ github.event.inputs.operator || 'dbt-operator' }}
+  OPERATOR_NAME: ${{ github.event.inputs.operator || 'dbt' }}
 
 jobs:
   quick-build:

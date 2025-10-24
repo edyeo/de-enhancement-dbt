@@ -9,7 +9,7 @@ on:
         default: 'dbt-operator'
         type: choice
         options:
-          - dbt-operator
+          - dbt
           - dbt-core-operator
           - dbt-postgres-operator
       action:
@@ -25,7 +25,7 @@ on:
           - clean
 
 env:
-  OPERATOR_NAME: ${{ github.event.inputs.operator || 'dbt-operator' }}
+  OPERATOR_NAME: ${{ github.event.inputs.operator || 'dbt' }}
 
 jobs:
   poetry-action:

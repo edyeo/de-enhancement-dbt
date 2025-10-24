@@ -232,7 +232,7 @@ docker run --rm -it -v $(pwd):/app dbt-operator:latest /bin/bash
    - 파라미터 설정 후 실행
 
 2. **사용 가능한 파라미터**:
-   - `operator`: 선택할 dbt-operator (dbt-operator, dbt-core-operator, dbt-postgres-operator)
+   - `operator`: 선택할 dbt-operator (dbt, dbt-core-operator, dbt-postgres-operator)
    - `image_tag`: Docker 이미지 태그 (기본값: latest)
    - `registry`: Docker 레지스트리 URL (기본값: localhost:65000)
    - `push_to_registry`: 레지스트리에 푸시 여부 (기본값: false)
