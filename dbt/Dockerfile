@@ -31,13 +31,12 @@ RUN poetry config virtualenvs.in-project true && \
 
 # Copy dbt project files
 COPY dbt_project.yml .
-COPY models/ models/
-COPY macros/ macros/
-COPY tests/ tests/
-COPY seeds/ seeds/
-COPY snapshots/ snapshots/
-COPY analysis/ analysis/
-COPY packages.yml packages.yml
+# COPY models/ models/
+# COPY macros/ macros/
+# COPY tests/ tests/
+# COPY seeds/ seeds/
+# COPY snapshots/ snapshots/
+# COPY packages.yml packages.yml
 
 # Create dbt profiles directory
 RUN mkdir -p /root/.dbt
@@ -53,4 +52,4 @@ RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Default command
-CMD ["dbt", "--help"]
+CMD ["poetry", "run", "dbt", "--help"]

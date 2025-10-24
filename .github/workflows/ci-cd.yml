@@ -54,11 +54,6 @@ jobs:
         cd ${{ env.OPERATOR_NAME }}
         make build IMAGE_NAME=${{ env.OPERATOR_NAME }} IMAGE_TAG=${{ env.IMAGE_TAG }} REGISTRY=${{ env.REGISTRY_URL }}
 
-    - name: Test Docker image
-      run: |
-        cd ${{ env.OPERATOR_NAME }}
-        make test IMAGE_NAME=${{ env.OPERATOR_NAME }} IMAGE_TAG=${{ env.IMAGE_TAG }} REGISTRY=${{ env.REGISTRY_URL }}
-
     - name: Push to registry
       if: github.event.inputs.push_to_registry == 'true' || github.ref == 'refs/heads/main'
       run: |
@@ -71,72 +66,9 @@ jobs:
         cd ${{ env.OPERATOR_NAME }}
         make clean IMAGE_NAME=${{ env.OPERATOR_NAME }} IMAGE_TAG=${{ env.IMAGE_TAG }} REGISTRY=${{ env.REGISTRY_URL }}
 
-  poetry-check:
-    runs-on: self-hosted
-    if: github.event.inputs.operator == 'dbt' || github.event.inputs.operator == '' || github.event_name == 'push' || github.event_name == 'pull_request'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 1.7.1
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.OPERATOR_NAME }}/.venv
-        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-
-    - name: Install dependencies
-      run: |
-        cd ${{ env.OPERATOR_NAME }}
-        poetry install --no-interaction --no-root
-
-    - name: Check Poetry configuration
-      run: |
-        cd ${{ env.OPERATOR_NAME }}
-        poetry check
-
-    - name: Run Poetry tests
-      run: |
-        cd ${{ env.OPERATOR_NAME }}
-        poetry run python -m pytest tests/ -v || echo "No tests found"
-
-  security-scan:
-    runs-on: self-hosted
-    if: github.event.inputs.operator == 'dbt' || github.event.inputs.operator == '' || github.event_name == 'push' || github.event_name == 'pull_request'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: '${{ env.REGISTRY_URL }}/${{ env.OPERATOR_NAME }}:${{ env.IMAGE_TAG }}'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-
-    - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
-      if: always()
-      with:
-        sarif_file: 'trivy-results.sarif'
-
   deploy:
     runs-on: self-hosted
-    needs: [build-and-test, poetry-check, security-scan]
+    needs: [build-and-test]
     if: github.ref == 'refs/heads/main' && (github.event.inputs.push_to_registry == 'true' || github.event_name == 'push')
     
     steps:

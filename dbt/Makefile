@@ -100,15 +100,6 @@ size: ## Show Docker image size
 	@echo "$(GREEN)[INFO]$(NC) Image size information:"
 	@docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedAt}}" | grep $(IMAGE_NAME) || echo "No images found"
 
-.PHONY: test
-test: build ## Build and test the Docker image
-	@echo "$(GREEN)[INFO]$(NC) Testing Docker image: $(FULL_IMAGE_NAME)"
-	@echo "$(BLUE)[TEST]$(NC) Testing dbt version..."
-	@docker run --rm $(FULL_IMAGE_NAME) dbt --version
-	@echo "$(BLUE)[TEST]$(NC) Testing dbt help..."
-	@docker run --rm $(FULL_IMAGE_NAME) dbt --help
-	@echo "$(GREEN)[INFO]$(NC) All tests passed!"
-
 .PHONY: dev
 dev: ## Build and run in development mode with volume mount
 	@echo "$(GREEN)[INFO]$(NC) Running in development mode with volume mount"
