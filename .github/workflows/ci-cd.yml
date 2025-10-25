@@ -71,16 +71,6 @@ jobs:
           make push IMAGE_NAME=${{ env.OPERATOR_NAME }} IMAGE_TAG=${{ env.IMAGE_TAG }} REGISTRY=${{ env.REGISTRY_URL }}
         fi
 
-    - name: Clean up
-      if: always()
-      run: |
-        cd ${{ env.OPERATOR_NAME }}
-        if [ "${{ env.OPERATOR_NAME }}" = "airflow" ]; then
-          make clean IMAGE_NAME=${{ env.OPERATOR_NAME }}-scheduler IMAGE_TAG=${{ env.IMAGE_TAG }} REGISTRY=${{ env.REGISTRY_URL }}
-        else
-          make clean IMAGE_NAME=${{ env.OPERATOR_NAME }} IMAGE_TAG=${{ env.IMAGE_TAG }} REGISTRY=${{ env.REGISTRY_URL }}
-        fi
-
   deploy:
     runs-on: self-hosted
     needs: [build-and-test]
