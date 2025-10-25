@@ -2,6 +2,19 @@
 ARG AIRFLOW_VERSION=3.1.0
 FROM apache/airflow:${AIRFLOW_VERSION} as base
 
+<<<<<<< HEAD
+=======
+# Set environment variables
+ENV AIRFLOW_HOME=/opt/airflow
+ENV PYTHONPATH=/opt/airflow/dags:/opt/airflow/plugins
+ENV AIRFLOW__CORE__EXECUTOR=KubernetesExecutor
+ENV AIRFLOW__KUBERNETES__NAMESPACE=default
+ENV AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY=apache/airflow
+ENV AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG=3.1.0
+ENV AIRFLOW__KUBERNETES__DELETE_WORKER_PODS=True
+ENV AIRFLOW__KUBERNETES__DELETE_WORKER_PODS_ON_FAILURE=True
+
+>>>>>>> e6d2d5fd5895fe85981e81a28cd365729fab8ce1
 # Switch to root for system package installation
 USER root
 
