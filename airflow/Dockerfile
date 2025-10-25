@@ -21,20 +21,16 @@ RUN apt-get update \
 
 # Copy requirements and install Python packages
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r /tmp/requirements.txt \
-    && rm /tmp/requirements.txt
 
 # Create custom directories
 RUN mkdir -p /opt/airflow/dags /opt/airflow/plugins /opt/airflow/logs \
-    && chown -R airflow:airflow /opt/airflow
+    && chown -R airflow:root /opt/airflow
 
 # Switch back to airflow user
 USER airflow
 
-# Health check for scheduler (check if scheduler process is running)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD pgrep -f "airflow scheduler" || exit 1
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r /tmp/requirements.txt
 
 # Default command (can be overridden in Helm chart)
 CMD ["airflow", "scheduler"]
