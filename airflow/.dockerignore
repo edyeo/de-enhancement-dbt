@@ -1,9 +1,30 @@
-FROM apache/airflow:3.1.0
-USER root
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
-         vim \
-  && apt-get autoremove -yqq --purge \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
-USER airflow
+# Git files
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# Build artifacts
+target/
+build/
+dist/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
