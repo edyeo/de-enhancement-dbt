@@ -34,7 +34,9 @@ COPY --chown=flink:flink requirements.txt .
 
 # [핵심] builder 스테이지에서는 JDK가 있으므로 
 # pemja가 소스에서 빌드되어도 성공합니다.
-RUN /usr/local/bin/uv pip install --python /opt/flink/venv/bin/python -r requirements.txt
+RUN /usr/local/bin/uv pip install --python /opt/flink/venv/bin/python -r requirements.txt && \
+    # PyFlink이 설치한 중복 Java 라이브러리 제거 (Flink 이미지에 이미 있음)
+    find /opt/flink/venv -name "*.jar" -type f -delete || true
 
 
 # =====================================================================
@@ -51,6 +53,10 @@ RUN apt-get update && \
 
 # Flink 설정 파일에 Python venv 경로 지정
 RUN echo "python.execution.environment.path: /opt/flink/venv" >> /opt/flink/conf/flink-conf.yaml
+
+# K8s 배포 시 ConfigMap/Volume 마운트를 위한 권한 설정
+# ConfigMap이 마운트되면 이 설정은 무시되므로, K8s에서 추가 설정 필요
+RUN chmod -R 777 /opt/flink/conf
 
 USER flink
 
