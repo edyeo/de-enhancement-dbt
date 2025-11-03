@@ -7,8 +7,13 @@ USER root
 
 # JDK와 C/C++ 빌드 도구, uv 설치 도구(pip) 설치
 # openjdk-21-jdk: pemja 빌드를 위한 JDK 헤더 파일 포함
+# python3.11: 지정된 Python 버전 사용
 RUN apt-get update && \
-    apt-get install -y openjdk-21-jdk build-essential python3-pip && \
+    apt-get install -y openjdk-21-jdk build-essential python3-pip \
+        software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa -y && \
+    apt-get update && \
+    apt-get install -y python3.11 python3.11-venv python3.11-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # JAVA_HOME 환경 변수 설정 (pemja 빌드를 위해 필요)
@@ -23,8 +28,8 @@ RUN pip3 install uv
 
 WORKDIR /opt/flink
 
-# venv 생성 (uv 사용) 및 소유권 변경
-RUN uv venv /opt/flink/venv && \
+# venv 생성 (uv 사용, Python 3.11 지정) 및 소유권 변경
+RUN uv venv --python python3.11 /opt/flink/venv && \
     chown -R flink:flink /opt/flink/venv
 
 USER flink
@@ -46,9 +51,12 @@ FROM flink:2.1.0-scala_2.12-java21
 
 USER root
 
-# Python3 런타임 및 다운로드 도구 설치
+# Python3.11 런타임 및 다운로드 도구 설치
 RUN apt-get update && \
-    apt-get install -y python3 python3-distutils curl && \
+    apt-get install -y curl software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa -y && \
+    apt-get update && \
+    apt-get install -y python3.11 python3.11-distutils && \
     rm -rf /var/lib/apt/lists/*
 
 # Prometheus metrics reporter 다운로드
