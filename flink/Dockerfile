@@ -46,10 +46,14 @@ FROM flink:2.1.0-scala_2.12-java21
 
 USER root
 
-# Python3 런타임 설치 (venv 실행에 필요, JDK와 빌드 도구는 불필요)
+# Python3 런타임 및 다운로드 도구 설치
 RUN apt-get update && \
-    apt-get install -y python3 python3-distutils && \
+    apt-get install -y python3 python3-distutils curl && \
     rm -rf /var/lib/apt/lists/*
+
+# Prometheus metrics reporter 다운로드
+RUN curl -L -o /opt/flink/lib/flink-metrics-prometheus-2.1.0.jar \
+    https://repo1.maven.org/maven2/org/apache/flink/flink-metrics-prometheus/2.1.0/flink-metrics-prometheus-2.1.0.jar
 
 # Flink 설정 파일에 Python venv 경로 지정
 RUN echo "python.execution.environment.path: /opt/flink/venv" >> /opt/flink/conf/flink-conf.yaml
@@ -71,3 +75,6 @@ COPY --from=builder --chown=flink:flink /opt/flink/venv /opt/flink/venv
 
 # 디버깅 등을 위한 PATH 설정
 ENV PATH="/opt/flink/venv/bin:$PATH"
+
+# Prometheus 메트릭 포트 노출
+EXPOSE 9249
