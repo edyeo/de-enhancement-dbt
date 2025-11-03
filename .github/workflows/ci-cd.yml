@@ -15,9 +15,7 @@ on:
         options:
           - dbt
           - airflow
-          - dbt-core-operator
-          - dbt-postgres-operator
-          - airflow-scheduler
+          - flink
       image_tag:
         description: 'Docker image tag'
         required: false
@@ -43,7 +41,7 @@ env:
 jobs:
   build-and-test:
     runs-on: self-hosted
-    if: github.event.inputs.operator == 'dbt' || github.event.inputs.operator == 'airflow' || github.event.inputs.operator == '' || github.event_name == 'push' || github.event_name == 'pull_request'
+    if: github.event.inputs.operator == 'dbt' || github.event.inputs.operator == 'airflow' || github.event.inputs.operator == 'flink' || github.event.inputs.operator == '' || github.event_name == 'push' || github.event_name == 'pull_request'
     
     steps:
     - name: Checkout code
@@ -56,19 +54,19 @@ jobs:
       run: |
         cd ${{ env.OPERATOR_NAME }}
         if [ "${{ env.OPERATOR_NAME }}" = "airflow" ]; then
-          make build IMAGE_NAME=${{ env.OPERATOR_NAME }}-scheduler IMAGE_TAG=${{ env.IMAGE_TAG }} REGISTRY=${{ env.REGISTRY_URL }} AIRFLOW_VERSION=${{ env.AIRFLOW_VERSION }}
+          docker build --build-arg AIRFLOW_VERSION=${{ env.AIRFLOW_VERSION }} \
+            -t ${{ env.REGISTRY_URL }}/${{ env.OPERATOR_NAME }}-scheduler:${{ env.IMAGE_TAG }} .
         else
-          make build IMAGE_NAME=${{ env.OPERATOR_NAME }} IMAGE_TAG=${{ env.IMAGE_TAG }} REGISTRY=${{ env.REGISTRY_URL }}
+          docker build -t ${{ env.REGISTRY_URL }}/${{ env.OPERATOR_NAME }}:${{ env.IMAGE_TAG }} .
         fi
 
     - name: Push to registry
       if: github.event.inputs.push_to_registry == 'true' || github.ref == 'refs/heads/main'
       run: |
-        cd ${{ env.OPERATOR_NAME }}
         if [ "${{ env.OPERATOR_NAME }}" = "airflow" ]; then
-          make push IMAGE_NAME=${{ env.OPERATOR_NAME }}-scheduler IMAGE_TAG=${{ env.IMAGE_TAG }} REGISTRY=${{ env.REGISTRY_URL }}
+          docker push ${{ env.REGISTRY_URL }}/${{ env.OPERATOR_NAME }}-scheduler:${{ env.IMAGE_TAG }}
         else
-          make push IMAGE_NAME=${{ env.OPERATOR_NAME }} IMAGE_TAG=${{ env.IMAGE_TAG }} REGISTRY=${{ env.REGISTRY_URL }}
+          docker push ${{ env.REGISTRY_URL }}/${{ env.OPERATOR_NAME }}:${{ env.IMAGE_TAG }}
         fi
 
   deploy:
