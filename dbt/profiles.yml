@@ -1,7 +1,7 @@
 dbt_operator_profile:
-  target: dev
+  target: dev_postgres
   outputs:
-    dev:
+    dev_postgres:
       type: postgres
       host: "{{ env_var('DBT_HOST', 'localhost') }}"
       user: "{{ env_var('DBT_USER', 'postgres') }}"
@@ -15,7 +15,7 @@ dbt_operator_profile:
       retries: 1
       retry_on_database_error: true
       
-    prod:
+    prod_postgres:
       type: postgres
       host: "{{ env_var('DBT_HOST', 'localhost') }}"
       user: "{{ env_var('DBT_USER', 'postgres') }}"
@@ -29,3 +29,32 @@ dbt_operator_profile:
       retries: 1
       retry_on_database_error: true
 
+    dev_iceberg:
+      type: duckdb
+      path: ":memory:"
+      
+      # 필수 확장 로드
+      extensions:
+        - httpfs
+        - aws
+        - iceberg
+
+      # MinIO 접속 설정 (K8s 환경변수 활용)
+      settings:
+        # s3_endpoint: "{{ env_var('MINIO_ENDPOINT') }}"
+        # s3_access_key_id: "{{ env_var('AWS_ACCESS_KEY_ID') }}"
+        # s3_secret_access_key: "{{ env_var('AWS_SECRET_ACCESS_KEY') }}"
+        # s3_region: "us-east-1"
+        # s3_use_ssl: false
+        # s3_url_style: "path"
+      
+        # Mac/Windows: host.docker.internal, Linux: host.docker.internal or bridge IP
+        s3_endpoint: "host.docker.internal:9000"
+        s3_access_key_id: "admin"
+        s3_secret_access_key: "mypassword"
+        s3_region: "ap-northeast-2"
+        s3_use_ssl: false
+        s3_url_style: "path"
+        
+        # Iceberg 테이블 버전 자동 감지 허용
+        unsafe_enable_version_guessing: true

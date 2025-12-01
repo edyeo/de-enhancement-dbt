@@ -29,27 +29,33 @@ RUN poetry config virtualenvs.in-project true && \
     poetry install --only=main --no-root && \
     rm -rf $POETRY_CACHE_DIR
 
+# Activate virtualenv by setting PATH
+ENV PATH="/app/.venv/bin:$PATH"
+
 # Copy dbt project files
 COPY dbt_project.yml .
-# COPY models/ models/
-# COPY macros/ macros/
-# COPY tests/ tests/
-# COPY seeds/ seeds/
-# COPY snapshots/ snapshots/
-# COPY packages.yml packages.yml
+COPY packages.yml packages.yml
 
-# Create dbt profiles directory
+# Create dbt profiles directory and copy profiles
 RUN mkdir -p /root/.dbt
-
-# Copy profiles.yml template (will be mounted or configured at runtime)
 COPY profiles.yml /root/.dbt/profiles.yml
+
+# Install dbt packages
+RUN dbt deps --target dev_iceberg
+
+# Copy remaining dbt project files
+COPY models/ models/
+COPY macros/ macros/
+COPY tests/ tests/
+COPY seeds/ seeds/
+COPY snapshots/ snapshots/
 
 # Create entrypoint script
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Set entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
+# ENTRYPOINT ["/entrypoint.sh"]
 
 # Default command
-CMD ["poetry", "run", "dbt", "--help"]
+# CMD ["poetry", "run", "dbt", "--help"]

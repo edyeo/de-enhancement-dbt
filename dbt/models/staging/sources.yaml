@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: minio_data_lake  # 소스 이름 (Source Name)
+    schema: cdc_db         # Iceberg 테이블이 위치한 논리적 네임스페이스
+    database: demo_catalog # Iceberg 카탈로그 이름 (profiles.yml에 등록된)
+
+    tables:
+      - name: taxis # 테이블 이름 (Table Name)
+        description: "외부에서 Flink가 적재한 Iceberg 테이블"
+        
+        # [핵심] DuckDB의 iceberg_scan 함수가 읽을 경로를 meta에 저장합니다.
+        # 테이블 루트 경로를 지정하면 DuckDB가 자동으로 최신 메타데이터를 찾습니다
+        meta:
+          iceberg_location: "s3://warehouse/nyc/taxis"
