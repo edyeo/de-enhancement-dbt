@@ -63,6 +63,10 @@ RUN apt-get update && \
 RUN curl -L -o /opt/flink/lib/flink-metrics-prometheus-2.1.0.jar \
     https://repo1.maven.org/maven2/org/apache/flink/flink-metrics-prometheus/2.1.0/flink-metrics-prometheus-2.1.0.jar
 
+
+RUN curl -L -o /opt/flink/lib/iceberg-flink-runtime-2.1.0.jar \
+    https://iceberg.apache.org/releases/#downloads/iceberg-flink-runtime-2.1.0.jar
+
 # Flink 설정 파일에 Python venv 경로 지정
 RUN echo "python.execution.environment.path: /opt/flink/venv" >> /opt/flink/conf/flink-conf.yaml
 
